@@ -7,26 +7,39 @@ def run_1(inputs):
     result = 1
     for i in range(len(times)):
         time, record = times[i], distances[i]
-        distances_for_time = get_distances_for_time(time)
-        winners = [d for d in distances_for_time if d > record]
-        result *= len(winners)
+        result *= get_num_winners(time, record)
     return result
 
 
 def run_2(inputs):
     time = int(''.join(i for i in inputs[0].split(':')[-1].split(' ') if i))
     distance = int(''.join(i for i in inputs[1].split(':')[-1].split(' ') if i))
-    distances_for_time = get_distances_for_time(time)
-    winners = [d for d in distances_for_time if d > distance]
-    return len(winners)
+    return get_num_winners(time, distance)
 
 
-def get_distances_for_time(time):
-    result = []
-    for seconds_charged in range(time+1):
+def get_num_winners(time, record_distance):
+    """
+    distance per time is a parabola with negative derivative, so if we find the
+    first and last times that beat the record, we can assume all times between
+    also beat the record
+    """
+    min_winner, max_winner = None, None
+
+    seconds_charged = 0
+    while min_winner is None:
         distance = (time - seconds_charged) * seconds_charged
-        result.append(distance)
-    return result
+        if distance > record_distance:
+            min_winner = seconds_charged
+        seconds_charged += 1
+
+    seconds_charged = time
+    while max_winner is None:
+        distance = (time - seconds_charged) * seconds_charged
+        if distance > record_distance:
+            max_winner = seconds_charged
+        seconds_charged -= 1
+
+    return max_winner - min_winner + 1
 
 
 def run_tests():
