@@ -12,7 +12,6 @@ def run_2(inputs):
     grid = Grid2D([i.strip() for i in inputs])
     loop = find_loop(grid)
     previous = loop[-2]
-    lefts, rights = set(), set()
     sides = {}
 
     start, first, last = loop[0], loop[1], loop[-2]
@@ -36,51 +35,31 @@ def run_2(inputs):
         direction = 1 if (x > previous[0] or y > previous[1]) else -1
         value = grid.value_at_position(point)
         if value == '-':
-            lefts.add((x, y-1))
-            rights.add((x, y+1))
             if direction == 1:
                 sides[point] = {(x,y-1),}
             else:
                 sides[point] = {(x,y+1),}
         elif value == '|':
-            rights.add((x-1, y))
-            lefts.add((x+1, y))
             if direction == 1:
                 sides[point] = {(x+1,y),}
             else:
                 sides[point] = {(x-1,y),}
         elif value == 'F':
-            lefts.add((x-1, y))
-            lefts.add((x-1, y-1))
-            lefts.add((x, y+1))
-            rights.add((x+1, y+1))
             if previous[1] == y:
                 sides[point] = set()
             else:
                 sides[point] = {(x-1,y), (x, y-1)}
         elif value == 'L':
-            lefts.add((x-1, y))
-            lefts.add((x-1, y+1))
-            lefts.add((x, y+1))
-            rights.add((x+1, y-1))
             if previous[1] == y:
                 sides[point] = {(x-1,y), (x, y+1)}
             else:
                 sides[point] = set()
         elif value == '7':
-            lefts.add((x, y-1))
-            lefts.add((x+1, y-1))
-            lefts.add((x+1, y))
-            rights.add((x-1, y+1))
             if previous[1] == y:
                 sides[point] = {(x+1,y), (x, y-1)}
             else:
                 sides[point] = set()
         elif value == 'J':
-            lefts.add((x+1, y))
-            lefts.add((x+1, y+1))
-            lefts.add((x, y+1))
-            rights.add((x-1, y-1))
             if previous[1] == y:
                 sides[point] = set()
             else:
@@ -89,51 +68,16 @@ def run_2(inputs):
             raise Exception(value)
         previous = point
 
-    # debug_grid = grid.copy()
-    # for point in loop[1:-1]:
-    #     for outside in sides[point]:
-    #         if debug_grid.value_at_position(outside) == '.':
-    #             debug_grid.set_value_at_position(outside, 'O')
-    def is_inside(point, grid, sides):
-        for i in range(x+1, grid.max_x+1):
-            if (i, y) in loop:
-                if (i-1, y) not in sides[(i, y)]:
-                    return True
-                else:
-                    return False
-        for i in range(x-1, grid.min_x-1, -1):
-            if (i, y) in loop:
-                if (i+1, y) not in sides[(i, y)]:
-                    return True
-                else:
-                    return False
-        for i in range(y+1, grid.max_y+1):
-            if (x, i) in loop:
-                if (x, i-1) not in sides[(x, i)]:
-                    return True
-                else:
-                    return False
-        for i in range(y-1, grid.min_y-1, -1):
-            if (x, i) in loop:
-                if (x, i+1) not in sides[(x, i)]:
-                    return True
-                else:
-                    return False
-        return False
-
     insides = set()
     outsides = set()
     for (x, y), value in grid:
-        # if value != '.':
-        #     continue
         if (x,y) in loop:
             continue
-        if is_inside((x,y), grid, sides):
+        if is_inside((x,y), grid, sides, loop):
             insides.add((x,y))
         else:
             outsides.add((x,y))
 
-    print(insides)
     # import pdb; pdb.set_trace()
     debug_grid = grid.copy()
     for point in insides:
@@ -143,42 +87,41 @@ def run_2(inputs):
     for point in loop:
         debug_grid.set_value_at_position(point, '*')
 
-    #     if debug_grid.value_at_position(point) == '.':
-    #         debug_grid.set_value_at_position(point, 'L')
-    # for point in rights:
-    #     if debug_grid.value_at_position(point) == '.':
-    #         debug_grid.set_value_at_position(point, 'R')
     print(debug_grid)
     print()
 
     should_use_insides = all(x != 0 and y != 0 for x,y in insides)
 
-
-
-    # print(lefts)
-    # print(rights)
     return len(insides) if should_use_insides else len(outsides)
 
 
-# def run_2(inputs):
-#     grid = Grid2D([i.strip() for i in inputs])
-#     loop = set(find_loop(grid))
-#     queue = [find_first('.', grid)]
-#     points_outside = set()
-#
-#     while queue:
-#         point = queue.pop(0)
-#         adjacents = find_adjacent_ground(point, grid)
-#         queue += [i for i in adjacents if i not in points_outside]
-#         points_outside = points_outside.union(set(adjacents))
-#
-#     debug_grid = grid.copy()
-#     for point in points_outside:
-#         debug_grid.set_value_at_position(point, 'X')
-#     print(debug_grid)
-#     print()
-#
-#     return grid.size() - len(loop) - len(points_outside)
+def is_inside(point, grid, sides, loop):
+    x, y = point
+    for i in range(x+1, grid.max_x+1):
+        if (i, y) in loop:
+            if (i-1, y) not in sides[(i, y)]:
+                return True
+            else:
+                return False
+    for i in range(x-1, grid.min_x-1, -1):
+        if (i, y) in loop:
+            if (i+1, y) not in sides[(i, y)]:
+                return True
+            else:
+                return False
+    for i in range(y+1, grid.max_y+1):
+        if (x, i) in loop:
+            if (x, i-1) not in sides[(x, i)]:
+                return True
+            else:
+                return False
+    for i in range(y-1, grid.min_y-1, -1):
+        if (x, i) in loop:
+            if (x, i+1) not in sides[(x, i)]:
+                return True
+            else:
+                return False
+    return False
 
 
 def find_adjacent_ground(point, grid):
