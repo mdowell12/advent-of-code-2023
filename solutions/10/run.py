@@ -73,22 +73,24 @@ def run_2(inputs):
     for (x, y), value in grid:
         if (x,y) in loop:
             continue
-        if is_inside((x,y), grid, sides, loop):
+        inside = is_inside((x,y), grid, sides, loop)
+        if inside is None:
+            continue
+        elif inside:
             insides.add((x,y))
         else:
             outsides.add((x,y))
 
-    # import pdb; pdb.set_trace()
-    debug_grid = grid.copy()
-    for point in insides:
-        debug_grid.set_value_at_position(point, 'I')
-    for point in outsides:
-        debug_grid.set_value_at_position(point, 'O')
-    for point in loop:
-        debug_grid.set_value_at_position(point, '*')
-
-    print(debug_grid)
-    print()
+    # debug_grid = grid.copy()
+    # for point in insides:
+    #     debug_grid.set_value_at_position(point, 'I')
+    # for point in outsides:
+    #     debug_grid.set_value_at_position(point, 'O')
+    # for point in loop:
+    #     debug_grid.set_value_at_position(point, '*')
+    #
+    # print(debug_grid)
+    # print()
 
     should_use_insides = all(x != 0 and y != 0 for x,y in insides)
 
@@ -121,7 +123,7 @@ def is_inside(point, grid, sides, loop):
                 return True
             else:
                 return False
-    return False
+    return None
 
 
 def find_adjacent_ground(point, grid):
@@ -141,7 +143,6 @@ def find_adjacent_ground(point, grid):
         if grid.value_at_position(other) == '.':
             result.append(other)
     return result
-
 
 
 def find_loop(grid):
@@ -311,6 +312,5 @@ if __name__ == "__main__":
     result_1 = run_1(input)
     print(f"Finished 1 with result {result_1}")
 
-    # 555 too high
     result_2 = run_2(input)
     print(f"Finished 2 with result {result_2}")
