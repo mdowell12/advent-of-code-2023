@@ -2,20 +2,31 @@ from solutions.get_inputs import read_inputs
 
 
 def run_1(inputs):
+    return run(inputs)
+
+
+def run_2(inputs):
+    lines = []
+    for line in inputs:
+        sequence = line.strip().split(' ')[0].strip()
+        new_sequence = '?'.join([sequence]*5)
+        frequencies = line.strip().split(' ')[1].strip()
+        new_frequencies = ','.join([frequencies]*5)
+        lines.append(f'{new_sequence} {new_frequencies}')
+    return run(lines)
+
+
+def run(lines):
     result = 0
     i = 0
-    for line in inputs:
+    for line in lines:
         sequence = line.strip().split(' ')[0].strip()
         frequencies = [int(i) for i in line.strip().split(' ')[1].split(',')]
         # import pdb; pdb.set_trace()
         result += num_possible(sequence, frequencies)
         i += 1
-        # print(i, result)
+        print(i, result)
     return result
-
-
-def run_2(inputs):
-    pass
 
 
 def num_possible(original_sequence, frequencies):
@@ -27,7 +38,7 @@ def num_possible(original_sequence, frequencies):
         sequence = queue.pop(0)
         tried_sequences.add(sequence)
         # print(sequence)
-        # print(len(tried_sequences))
+        print(len(tried_sequences))
         # import pdb; pdb.set_trace()
         if '?' not in sequence:
             if is_valid(sequence, frequencies):
