@@ -110,3 +110,12 @@ class Grid2D:
         # End of row, go to next row
         self.current_position = (self.min_x, curr_y + 1)
         return self.current_position, self.items.get(self.current_position)
+
+    def __eq__(self, other):
+        if isinstance(other, Grid2D):
+            for (x,y), value in other:
+                if value != self.value_at_position((x,y)):
+                    return False
+            return True
+        else:
+            return False
