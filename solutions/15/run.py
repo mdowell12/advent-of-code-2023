@@ -5,17 +5,51 @@ def run_1(inputs):
     steps = []
     for i in inputs:
         steps += [j.strip() for j in i.strip().split(',')]
-
     total = 0
     for step in steps:
         hash = run_hash(step)
         total += hash
-
     return total
 
 
 def run_2(inputs):
-    pass
+    steps = []
+    for i in inputs:
+        steps += [j.strip() for j in i.strip().split(',')]
+
+    map = {i: [] for i in range(256)}
+    for step in steps:
+        if '=' in step:
+            label, value = step.split('=')
+            remove = False
+        elif '-' in step:
+            label = step.replace('-', '')
+            remove = True
+        else:
+            raise Exception(step)
+        values = map[run_hash(label)]
+        index, matched_value = matching(label, values)
+        if remove:
+            if index is not None:
+                del values[index]
+        else:
+            if index is None:
+                values.append((label, value))
+            else:
+                values[index] = (label, max(value, value))
+
+    result = 0
+    for box, values in map.items():
+        for slot, (label, value) in enumerate(values):
+            result += (box+1) * (slot+1) * int(value)
+    return result
+
+
+def matching(label, values):
+    for i, (other_label, value) in enumerate(values):
+        if label == other_label:
+            return (i, value)
+    return None, None
 
 
 def run_hash(string):
